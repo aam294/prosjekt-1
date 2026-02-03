@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Escalated Case Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>Escalated Case Tracker</h1>
+      <p>Track escalated cases by organization number and see how many business days have passed.</p>
+    </header>
+
+    <section class="card">
+      <h2>New escalated case</h2>
+      <form id="case-form" class="case-form">
+        <div class="field">
+          <label for="orgNumber">Organization number</label>
+          <input id="orgNumber" name="orgNumber" type="text" required placeholder="Enter organization number" />
+        </div>
+
+        <div class="field">
+          <label for="department">Department</label>
+          <select id="department" name="department" required>
+            <option value="" disabled selected>Select department</option>
+            <option value="MCQ">MCQ</option>
+            <option value="FCP">FCP</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="dateEscalated">Date escalated</label>
+          <input id="dateEscalated" name="dateEscalated" type="date" required />
+        </div>
+
+        <div class="field field-full">
+          <label for="description">Description</label>
+          <input id="description" name="description" type="text" placeholder="Short description (optional)" />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn primary">Add case</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="list-header">
+        <h2>Cases</h2>
+        <div class="filters" role="tablist">
+          <button type="button" class="filter-btn active" data-filter="open">Open</button>
+          <button type="button" class="filter-btn" data-filter="returned">Returned</button>
+          <button type="button" class="filter-btn" data-filter="all">All</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="case-table">
+          <thead>
+            <tr>
+              <th>Organization number</th>
+              <th>Department</th>
+              <th>Date escalated</th>
+              <th>Due date (7 business days)</th>
+              <th>Business days since escalated</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="case-table-body">
+            <!-- Rows rendered by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="note">
+      <p>
+        Color coding (based on <strong>business days since escalated</strong>):
+        <span class="legend legend-green">0–4 days</span>,
+        <span class="legend legend-yellow">5–7 days</span>,
+        <span class="legend legend-red">&gt;7 days</span>.
+      </p>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
