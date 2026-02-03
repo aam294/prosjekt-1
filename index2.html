@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Escalated Cases as PDF</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <h1>Escalated Case Tracker – Export</h1>
+        <p>
+          This page reads your locally stored escalated cases and lets you
+          download them as a PDF file on your computer.
+        </p>
+        <p>
+          <a href="index.html" class="btn ghost">Back to case tracker</a>
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Download cases as PDF</h2>
+        <button type="button" id="save-pdf" class="btn primary">
+          Download cases as PDF
+        </button>
+        <p class="note">
+          Only cases stored in this browser (on this computer) will be included.
+        </p>
+      </section>
+    </div>
+
+    <!-- jsPDF from CDN -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+      integrity="sha512-/FzVtVg1tRZCqMFvByvX1bYv+e0Xqf5FsXfH7tWxtXgJ7J7pDQCBGxko8QeK0mqy9U+lWlG2sV1P2vT8W3kS1g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script>
+      const STORAGE_KEY = "escalatedCases_v1";
+
+      function loadCases() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function formatCaseLine(item, index) {
+        const parts = [];
+        parts.push(`${index + 1}. Org: ${item.orgNumber || "-"}`);
+        parts.push(`Dept: ${item.department || "-"}`);
+        parts.push(`Escalated: ${item.dateEscalated || "-"}`);
+        parts.push(`Due: ${item.dueDate || "-"}`);
+        parts.push(`Status: ${item.status || "-"}`);
+        if (item.description) {
+          parts.push(`Desc: ${item.description}`);
+        }
+        return parts.join(" | ");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const button = document.getElementById("save-pdf");
+        if (!button) return;
+
+        button.addEventListener("click", () => {
+          const cases = loadCases();
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+
+          doc.setFontSize(16);
+          doc.text("Escalated Case Tracker – Cases overview", 10, 10);
+
+          doc.setFontSize(12);
+          let y = 20;
+
+          if (!cases.length) {
+            doc.text("No cases found in this browser.", 10, y);
+          } else {
+            cases.forEach((item, index) => {
+              const line = formatCaseLine(item, index);
+              const wrapped = doc.splitTextToSize(line, 180);
+              doc.text(wrapped, 10, y);
+              y += wrapped.length * 7;
+
+              if (y > 280) {
+                doc.addPage();
+                y = 20;
+              }
+            });
+          }
+
+          doc.save("cases.pdf");
+        });
+      });
+    </script>
+  </body>
+</html>
+
