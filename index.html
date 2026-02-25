@@ -10,22 +10,25 @@
   <div class="app">
     <header class="app-header">
       <h1>Escalated Case Tracker</h1>
-      <p>Track escalated cases by organization number and see how many business days have passed.</p>
-      <p>
-        <a href="index2.html" class="btn ghost">Download cases as PDF</a>
-      </p>
+      <p>Track cases escalated to MCQ and FCP.</p>
     </header>
 
     <section class="card">
       <h2>New escalated case</h2>
+      <p class="required-note"><span class="required">*</span> Required fields</p>
       <form id="case-form" class="case-form">
         <div class="field">
-          <label for="orgNumber">Organization number</label>
+          <label for="orgNumber">Organization number <span class="required">*</span></label>
           <input id="orgNumber" name="orgNumber" type="text" required placeholder="Enter organization number" />
         </div>
 
         <div class="field">
-          <label for="department">Department</label>
+          <label for="msn">MSN <span class="required">*</span></label>
+          <input id="msn" name="msn" type="text" required placeholder="Enter MSN" />
+        </div>
+
+        <div class="field">
+          <label for="department">Department <span class="required">*</span></label>
           <select id="department" name="department" required>
             <option value="" disabled selected>Select department</option>
             <option value="MCQ">MCQ</option>
@@ -34,13 +37,13 @@
         </div>
 
         <div class="field">
-          <label for="dateEscalated">Date escalated</label>
+          <label for="dateEscalated">Date escalated <span class="required">*</span></label>
           <input id="dateEscalated" name="dateEscalated" type="date" required />
         </div>
 
         <div class="field field-full">
-          <label for="description">Description</label>
-          <input id="description" name="description" type="text" placeholder="Short description (optional)" />
+          <label for="description">Reason <span class="required">*</span></label>
+          <textarea id="description" name="description" required placeholder="Short reason for escalating" rows="2"></textarea>
         </div>
 
         <div class="form-actions">
@@ -52,10 +55,13 @@
     <section class="card">
       <div class="list-header">
         <h2>Cases</h2>
-        <div class="filters" role="tablist">
-          <button type="button" class="filter-btn active" data-filter="open">Open</button>
-          <button type="button" class="filter-btn" data-filter="returned">Returned</button>
-          <button type="button" class="filter-btn" data-filter="all">All</button>
+        <div class="list-header-right">
+          <input type="text" id="search-input" placeholder="Search by org number or MSN" class="search-input" />
+          <div class="filters" role="tablist">
+            <button type="button" class="filter-btn active" data-filter="open">Open</button>
+            <button type="button" class="filter-btn" data-filter="returned">Returned</button>
+            <button type="button" class="filter-btn" data-filter="all">All</button>
+          </div>
         </div>
       </div>
 
@@ -64,10 +70,12 @@
           <thead>
             <tr>
               <th>Organization number</th>
+              <th>MSN</th>
               <th>Department</th>
               <th>Date escalated</th>
-              <th>Due date (7 business days)</th>
-              <th>Business days since escalated</th>
+              <th>Due date</th>
+              <th>Business days</th>
+              <th>Reason</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -77,19 +85,21 @@
           </tbody>
         </table>
       </div>
-    </section>
 
-    <section class="note">
-      <p>
-        Color coding (based on <strong>business days since escalated</strong>):
-        <span class="legend legend-green">0–4 days</span>,
-        <span class="legend legend-yellow">5–7 days</span>,
-        <span class="legend legend-red">&gt;7 days</span>.
+      <div id="empty-state" class="empty-state" style="display:none;">
+        No cases to show.
+      </div>
+
+      <p class="color-legend">
+        Color coding:
+        <span class="legend legend-green">0–7 days</span>
+        <span class="legend legend-red">&gt;7 days</span>
       </p>
     </section>
   </div>
 
+  <div id="toast" class="toast" style="display:none;"></div>
+
   <script src="app.js"></script>
 </body>
 </html>
-

@@ -65,11 +65,7 @@ function computeStatusInfo(dateEscalated) {
   let badgeClass = "badge-green";
   let label = `${days} business day${days === 1 ? "" : "s"} (OK)`;
 
-  if (days >= 5 && days <= 7) {
-    bucketClass = "age-yellow";
-    badgeClass = "badge-yellow";
-    label = `${days} business day${days === 1 ? "" : "s"} (warning)`;
-  } else if (days > 7) {
+  if (days > 7) {
     bucketClass = "age-red";
     badgeClass = "badge-red";
     label = `${days} business day${days === 1 ? "" : "s"} (overdue)`;
@@ -78,18 +74,63 @@ function computeStatusInfo(dateEscalated) {
   return { days, bucketClass, badgeClass, label };
 }
 
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.style.display = "block";
+  toast.classList.add("toast-visible");
+  setTimeout(() => {
+    toast.classList.remove("toast-visible");
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 300);
+  }, 2000);
+}
+
+function getSearchQuery() {
+  const input = document.getElementById("search-input");
+  return input ? input.value.trim().toLowerCase() : "";
+}
+
+function updateFilterCounts() {
+  const cases = loadCases();
+  const openCount = cases.filter((c) => c.status === "open").length;
+  const returnedCount = cases.filter((c) => c.status === "returned").length;
+
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    const filter = btn.dataset.filter;
+    if (filter === "open") {
+      btn.textContent = `Open (${openCount})`;
+    } else if (filter === "returned") {
+      btn.textContent = `Returned (${returnedCount})`;
+    } else if (filter === "all") {
+      btn.textContent = `All (${cases.length})`;
+    }
+  });
+}
+
 function renderCases(filter = "open") {
   const tbody = document.getElementById("case-table-body");
+  const emptyState = document.getElementById("empty-state");
   if (!tbody) return;
 
   const cases = loadCases();
-  const today = new Date();
+  const searchQuery = getSearchQuery();
 
   let filtered = cases;
   if (filter === "open") {
     filtered = cases.filter((c) => c.status === "open");
   } else if (filter === "returned") {
     filtered = cases.filter((c) => c.status === "returned");
+  }
+
+  if (searchQuery) {
+    filtered = filtered.filter(
+      (c) =>
+        (c.orgNumber || "").toLowerCase().includes(searchQuery) ||
+        (c.msn || "").toLowerCase().includes(searchQuery)
+    );
   }
 
   filtered.sort((a, b) => {
@@ -99,6 +140,17 @@ function renderCases(filter = "open") {
   });
 
   tbody.innerHTML = "";
+
+  if (filtered.length === 0) {
+    if (emptyState) {
+      emptyState.style.display = "block";
+      emptyState.textContent = searchQuery
+        ? "No cases match your search."
+        : `No ${filter === "all" ? "" : filter + " "}cases to show.`;
+    }
+  } else {
+    if (emptyState) emptyState.style.display = "none";
+  }
 
   filtered.forEach((item) => {
     const dueDate = new Date(item.dueDate);
@@ -113,6 +165,10 @@ function renderCases(filter = "open") {
     const orgCell = document.createElement("td");
     orgCell.textContent = item.orgNumber;
     tr.appendChild(orgCell);
+
+    const msnCell = document.createElement("td");
+    msnCell.textContent = item.msn || "";
+    tr.appendChild(msnCell);
 
     const deptCell = document.createElement("td");
     deptCell.textContent = item.department;
@@ -139,6 +195,11 @@ function renderCases(filter = "open") {
     }
     tr.appendChild(daysCell);
 
+    const reasonCell = document.createElement("td");
+    reasonCell.className = "reason-cell";
+    reasonCell.textContent = item.description || "";
+    tr.appendChild(reasonCell);
+
     const statusCell = document.createElement("td");
     const statusPill = document.createElement("span");
     statusPill.className = "status-pill";
@@ -147,12 +208,12 @@ function renderCases(filter = "open") {
     tr.appendChild(statusCell);
 
     const actionsCell = document.createElement("td");
+    actionsCell.className = "actions-cell";
     const markBtn = document.createElement("button");
     markBtn.type = "button";
     markBtn.className = "btn secondary";
-    markBtn.style.marginRight = "4px";
     if (item.status === "open") {
-      markBtn.textContent = "Mark as returned";
+      markBtn.textContent = "Return";
       markBtn.addEventListener("click", () => {
         updateCaseStatus(item.id, "returned");
       });
@@ -177,6 +238,8 @@ function renderCases(filter = "open") {
 
     tbody.appendChild(tr);
   });
+
+  updateFilterCounts();
 }
 
 function updateCaseStatus(id, newStatus) {
@@ -203,11 +266,12 @@ function handleFormSubmit(event) {
   event.preventDefault();
   const form = event.target;
   const orgNumber = form.orgNumber.value.trim();
+  const msn = form.msn.value.trim();
   const department = form.department.value;
   const dateEscalated = form.dateEscalated.value;
   const description = form.description.value.trim();
 
-  if (!orgNumber || !department || !dateEscalated) {
+  if (!orgNumber || !msn || !department || !dateEscalated || !description) {
     return;
   }
 
@@ -216,6 +280,7 @@ function handleFormSubmit(event) {
   const newCase = {
     id: Date.now().toString(),
     orgNumber,
+    msn,
     department,
     dateEscalated,
     description,
@@ -233,6 +298,7 @@ function handleFormSubmit(event) {
 
   renderCases("open");
   setActiveFilterButton("open");
+  showToast("Case added successfully");
 }
 
 function setActiveFilterButton(filter) {
@@ -255,6 +321,16 @@ function initFilters() {
   });
 }
 
+function initSearch() {
+  const input = document.getElementById("search-input");
+  if (!input) return;
+  input.addEventListener("input", () => {
+    const activeFilter = document.querySelector(".filter-btn.active")?.dataset
+      .filter;
+    renderCases(activeFilter || "open");
+  });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("case-form");
   if (form) {
@@ -267,6 +343,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   initFilters();
+  initSearch();
   renderCases("open");
 });
-
