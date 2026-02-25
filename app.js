@@ -65,11 +65,7 @@ function computeStatusInfo(dateEscalated) {
   let badgeClass = "badge-green";
   let label = `${days} business day${days === 1 ? "" : "s"} (OK)`;
 
-  if (days >= 5 && days <= 7) {
-    bucketClass = "age-yellow";
-    badgeClass = "badge-yellow";
-    label = `${days} business day${days === 1 ? "" : "s"} (warning)`;
-  } else if (days > 7) {
+  if (days > 7) {
     bucketClass = "age-red";
     badgeClass = "badge-red";
     label = `${days} business day${days === 1 ? "" : "s"} (overdue)`;

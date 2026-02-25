@@ -10,22 +10,25 @@
   <div class="app">
     <header class="app-header">
       <h1>Escalated Case Tracker</h1>
-      <p>Track escalated cases by organization number and see how many business days have passed.</p>
-      <p>
-        <a href="index2.html" class="btn ghost">Download cases as PDF</a>
-      </p>
+      <p>Track cases escalated to MCQ and FCP.</p>
     </header>
 
     <section class="card">
       <h2>New escalated case</h2>
+      <p class="required-note"><span class="required">*</span> Required fields</p>
       <form id="case-form" class="case-form">
         <div class="field">
-          <label for="orgNumber">Organization number</label>
+          <label for="orgNumber">Organization number <span class="required">*</span></label>
           <input id="orgNumber" name="orgNumber" type="text" required placeholder="Enter organization number" />
         </div>
 
         <div class="field">
-          <label for="department">Department</label>
+          <label for="msn">MSN <span class="required">*</span></label>
+          <input id="msn" name="msn" type="text" required placeholder="Enter MSN" />
+        </div>
+
+        <div class="field">
+          <label for="department">Department <span class="required">*</span></label>
           <select id="department" name="department" required>
             <option value="" disabled selected>Select department</option>
             <option value="MCQ">MCQ</option>
@@ -34,13 +37,13 @@
         </div>
 
         <div class="field">
-          <label for="dateEscalated">Date escalated</label>
+          <label for="dateEscalated">Date escalated <span class="required">*</span></label>
           <input id="dateEscalated" name="dateEscalated" type="date" required />
         </div>
 
         <div class="field field-full">
-          <label for="description">Description</label>
-          <input id="description" name="description" type="text" placeholder="Short description (optional)" />
+          <label for="description">Reason <span class="required">*</span></label>
+          <input id="description" name="description" type="text" required placeholder="Short reason for escalating" />
         </div>
 
         <div class="form-actions">
@@ -82,8 +85,7 @@
     <section class="note">
       <p>
         Color coding (based on <strong>business days since escalated</strong>):
-        <span class="legend legend-green">0–4 days</span>,
-        <span class="legend legend-yellow">5–7 days</span>,
+        <span class="legend legend-green">0–7 days</span>,
         <span class="legend legend-red">&gt;7 days</span>.
       </p>
     </section>
